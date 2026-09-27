@@ -273,12 +273,12 @@ $$
 
 Maxwell 方程组里有：
 
-|定律|数学形式|直观含义|
-|---|---|---|
-|Gauss's Law|$\nabla\cdot E=\rho/\epsilon_0$|**电荷是电场的源/汇**|
-|Gauss's Law for Magnetism|$\nabla\cdot B=0$|**没有磁单极子**|
-|Faraday's Law|$\nabla\times E=-\partial B/\partial t$|变化的磁场产生电场|
-|Ampère-Maxwell Law|$\nabla\times B=\mu_0J+\mu_0\epsilon_0\partial E/\partial t$|电流/变化的电场产生磁场|
+| 定律                      | 数学形式                                                     | 直观含义                |
+| ------------------------- | ------------------------------------------------------------ | ----------------------- |
+| Gauss's Law               | $\nabla\cdot E=\rho/\epsilon_0$                              | **电荷是电场的源/汇**   |
+| Gauss's Law for Magnetism | $\nabla\cdot B=0$                                            | **没有磁单极子**        |
+| Faraday's Law             | $\nabla\times E=-\partial B/\partial t$                      | 变化的磁场产生电场      |
+| Ampère-Maxwell Law        | $\nabla\times B=\mu_0J+\mu_0\epsilon_0\partial E/\partial t$ | 电流/变化的电场产生磁场 |
 
 其中你现在可以先抓住一个非常漂亮的区别：
 
