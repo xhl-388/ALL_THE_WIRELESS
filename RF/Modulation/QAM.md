@@ -78,18 +78,58 @@ I = 0，Q = 1  → −sin(2πfc·t)       → 相位 90°
 
 这里 **FFT 点数不等于实际发射的子载波数**：有些位置留空；实际使用的子载波里，又要区分**数据**和用于辅助接收的**导频**。Wi‑Fi 6 还可以用 OFDMA 把频带切成较小的 RU 分配给不同设备，所以某个设备不一定独占表中的全部子载波。([mathworks.com](https://www.mathworks.com/help/wlan/gs/non-ht-ppdu-structure.html?utm_source=openai))
 
-**QAM 呢？**比如说“256‑QAM”，意思是**一条数据子载波在一个 OFDM 符号里，可以选择 256 个 I/Q 星座点中的一个**，因此携带 `log₂(256) = 8` 个**编码后的比特**；不是说有 256 条子载波。
+**QAM 呢？**比如说“256‑QAM”，意思是**一条数据子载波在一个 OFDM 符号里，可以选择 256 个 I/Q 星座点中的一个**，所以每个子载波符号映射 `log₂(256) = 8` 个编码比特（$N_{BPSC}=8$）；不是说有 256 条子载波。
 
-| 调制 | 每条数据子载波、每个 OFDM 符号携带 |
-|---|---:|
-| BPSK | 1 个编码后比特 |
-| QPSK | 2 个编码后比特 |
-| 16‑QAM | 4 个编码后比特 |
-| 64‑QAM | 6 个编码后比特 |
-| 256‑QAM | 8 个编码后比特 |
-| 1024‑QAM | 10 个编码后比特 |
-| 4096‑QAM | 12 个编码后比特 |
+### Wi‑Fi 的 MCS 档位
 
-这些是星座映射的数量；Wi‑Fi 传输还要经过纠错编码，所以**不能直接把这个数当成净数据速率**。802.11a/g 的 OFDM 模式最高列到 64‑QAM，Wi‑Fi 5 列到 256‑QAM，Wi‑Fi 6 列到 1024‑QAM，Wi‑Fi 7 列到 4096‑QAM；实际会选择哪档，取决于所用模式和链路条件。([mathworks.com](https://www.mathworks.com/help/wlan/ref/wlannonhtconfig.html?utm_source=openai))
+**MCS（Modulation and Coding Scheme，调制与编码方案）把调制阶数和 FEC 编码率组合成一个档位。**下面是 HT/VHT/HE/EHT 常用的基础映射；MCS 0–7 在各代大体沿用，之后的档位随 PHY 代际扩展：
 
-**把两者合起来看：**Wi‑Fi 5 的一个 80 MHz 配置有 **234 条数据子载波**。如果这些子载波采用 256‑QAM，那么一个 OFDM 符号、**每条空间流**可以放 `234 × 8 = 1872` 个编码后比特。可以想成 **234 条路同时走，每条路这一次各选 256 种状态之一**。([mathworks.com](https://www.mathworks.com/help/wlan/ref/wlanvhtconfig.html))
+| MCS | 调制 | 每子载波比特数 $N_{BPSC}$ | 编码率 $R_c$ | 主要适用 PHY |
+|---:|---|---:|---:|---|
+| 0 | BPSK | 1 | 1/2 | HT / VHT / HE / EHT |
+| 1 | QPSK | 2 | 1/2 | HT / VHT / HE / EHT |
+| 2 | QPSK | 2 | 3/4 | HT / VHT / HE / EHT |
+| 3 | 16‑QAM | 4 | 1/2 | HT / VHT / HE / EHT |
+| 4 | 16‑QAM | 4 | 3/4 | HT / VHT / HE / EHT |
+| 5 | 64‑QAM | 6 | 2/3 | HT / VHT / HE / EHT |
+| 6 | 64‑QAM | 6 | 3/4 | HT / VHT / HE / EHT |
+| 7 | 64‑QAM | 6 | 5/6 | HT / VHT / HE / EHT |
+| 8 | 256‑QAM | 8 | 3/4 | VHT / HE / EHT¹ |
+| 9 | 256‑QAM | 8 | 5/6 | VHT / HE / EHT¹ |
+| 10 | 1024‑QAM | 10 | 3/4 | HE / EHT |
+| 11 | 1024‑QAM | 10 | 5/6 | HE / EHT |
+| 12 | 4096‑QAM | 12 | 3/4 | EHT（Wi‑Fi 7）|
+| 13 | 4096‑QAM | 12 | 5/6 | EHT（Wi‑Fi 7）|
+
+¹ **HT（802.11n）的 MCS 8、9 不是 256‑QAM**：HT 用 MCS 编号同时表示空间流数和每流调制/编码组合。HT MCS 0–7 对应 1 条空间流的基础映射；8–15、16–23、24–31 分别重复这 8 种组合用于 2、3、4 条空间流（另有 MCS 32 特殊模式）。因此看 MCS 数字时，必须先确认 PHY 代际，不能脱离标准单独解释。
+
+常见索引范围：**HT（Wi‑Fi 4）MCS 0–31**（另有特殊 MCS 32）、**VHT（Wi‑Fi 5）0–9**、**HE（Wi‑Fi 6/6E）0–11**、**EHT（Wi‑Fi 7）0–13**。设备不一定支持该代际的每个 MCS/空间流组合。
+
+**旧式 OFDM（802.11a/g）通常列数据率，而不使用后续 HT/VHT/HE 那种通用 MCS 编号。**对应关系如下，避免把速率序号误当作 MCS：
+
+| PHY 数据率 | 调制 | 编码率 |
+|---:|---|---:|
+| 6 Mbps | BPSK | 1/2 |
+| 9 Mbps | BPSK | 3/4 |
+| 12 Mbps | QPSK | 1/2 |
+| 18 Mbps | QPSK | 3/4 |
+| 24 Mbps | 16‑QAM | 1/2 |
+| 36 Mbps | 16‑QAM | 3/4 |
+| 48 Mbps | 64‑QAM | 2/3 |
+| 54 Mbps | 64‑QAM | 3/4 |
+
+### MCS 怎样影响数据率？
+
+每个 OFDM 符号、每条空间流先有 $N_{CBPS}$ 个送入星座映射的**编码比特**，经过 FEC 编码率折算后，对应 $N_{DBPS}$ 个**数据比特**：
+
+$$
+N_{CBPS}=N_{SD}\times N_{BPSC},\qquad N_{DBPS}=N_{CBPS}\times R_c
+$$
+
+$N_{SD}$ 是该配置分配给数据的子载波数（OFDMA 时使用该用户 RU 中的数据子载波数），$N_{BPSC}$ 和 $R_c$ 由 MCS 决定。多空间流的总数据位数还要乘空间流数 $N_{SS}$；PHY 速率还取决于 OFDM 符号时长（包括 GI）。所以**同一个 MCS 并不对应唯一 Mbps 数值**：带宽/RU、空间流数、GI 和 PHY 代际都会影响速率，MAC 开销还会进一步降低实际吞吐量。
+
+一般来说，提高 MCS 会增加每个符号承载的编码数据量，但也要求更好的信道条件；MCS 数字高不代表链路一定更快或更可靠。设备会根据接收质量、误包/重传等情况选择速率。
+
+这些标准映射可对照 [MathWorks VHT 配置说明](https://www.mathworks.com/help/wlan/ref/wlanvhtconfig.html)、[HE 配置说明](https://www.mathworks.com/help/wlan/ref/wlanheconfig.html) 和 [EHT 配置说明](https://www.mathworks.com/help/wlan/ref/wlanehtconfig.html)；各 PHY 的支持范围及特殊组合以 IEEE 802.11 对应修订版和芯片能力为准。
+
+**把两者合起来看：**Wi‑Fi 5 的一个 80 MHz 配置有 **234 条数据子载波**。如果这些子载波采用 256‑QAM、编码率 5/6，那么单条空间流每个 OFDM 符号有 `234 × 8 = 1872` 个编码比特，对应 `1872 × 5/6 = 1560` 个数据比特（忽略标准中的服务/填充等细节）。可以想成 **234 条路同时走，每条路从 256 个星座点中选一个；FEC 再决定编码比特中有多少对应数据位**。([mathworks.com](https://www.mathworks.com/help/wlan/ref/wlanvhtconfig.html))
