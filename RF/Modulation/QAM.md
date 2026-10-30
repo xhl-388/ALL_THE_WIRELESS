@@ -130,6 +130,8 @@ $N_{SD}$ 是该配置分配给数据的子载波数（OFDMA 时使用该用户 R
 
 一般来说，提高 MCS 会增加每个符号承载的编码数据量，但也要求更好的信道条件；MCS 数字高不代表链路一定更快或更可靠。设备会根据接收质量、误包/重传等情况选择速率。
 
+**STBC 与 MCS 是不同维度。**[[Wi-Fi STBC|STBC（空时分组编码）]]把调制符号跨发射分支和符号时间组织起来，以提高抗衰落能力；它不会把 256-QAM 改成更高阶 QAM，也不等于新增独立数据空间流。计算速率时，应区分数据空间流数 $N_{SS}$ 与 STBC 产生的空时流数 $N_{STS}$，不能按发射天线数直接倍增数据率。
+
 这些标准映射可对照 [MathWorks VHT 配置说明](https://www.mathworks.com/help/wlan/ref/wlanvhtconfig.html)、[HE 配置说明](https://www.mathworks.com/help/wlan/ref/wlanheconfig.html) 和 [EHT 配置说明](https://www.mathworks.com/help/wlan/ref/wlanehtconfig.html)；各 PHY 的支持范围及特殊组合以 IEEE 802.11 对应修订版和芯片能力为准。
 
 **把两者合起来看：**Wi‑Fi 5 的一个 80 MHz 配置有 **234 条数据子载波**。如果这些子载波采用 256‑QAM、编码率 5/6，那么单条空间流每个 OFDM 符号有 `234 × 8 = 1872` 个编码比特，对应 `1872 × 5/6 = 1560` 个数据比特（忽略标准中的服务/填充等细节）。可以想成 **234 条路同时走，每条路从 256 个星座点中选一个；FEC 再决定编码比特中有多少对应数据位**。([mathworks.com](https://www.mathworks.com/help/wlan/ref/wlanvhtconfig.html))
